@@ -38,53 +38,57 @@ else() # Local build
 			# Fix podofo not linking against OpenSSL::Crypto
 			target_link_libraries(podofo_static INTERFACE OpenSSL::Crypto Freetype::Freetype LibXml2::LibXml2 ZLIB::ZLIB)
 		endif()
-
 	
-		message(STATUS "Found PoDoFo in ${podofo_DIR}")
-		# Needed for dependency satisfaction after external project has been built
-		add_custom_target(podofo-extern DEPENDS podofo)
-
-
-	else() # PoDoFo has not been built yet. Configure for build.
-	
-		set(HAVE_DEPENDENCIES FALSE)
-
-		set(DISABLE_FIND_PACKAGE)
-		if(WIN32)
-			set(DISABLE_FIND_PACKAGE -DCMAKE_DISABLE_FIND_PACKAGE_Libidn=TRUE -DCMAKE_DISABLE_FIND_PACKAGE_Fontconfig=TRUE)
-		else()
-			set(DISABLE_FIND_PACKAGE -DCMAKE_DISABLE_FIND_PACKAGE_Libidn=TRUE)
-		endif()
-
-		if(NOT BUILD_SHARED_LIBS)
-			set(STATIC_XML LIBXML_STATIC)
-		endif()
-
-		ExternalProject_Add(
-			podofo-extern
-			PREFIX ${EXTERN}
-			# URL https://github.com/podofo/podofo/archive/refs/tags/0.10.4.tar.gz
-			# URL_HASH SHA256=6b1b13cdfb2ba5e8bbc549df507023dd4873bc946211bc6942183b8496986904
-			GIT_REPOSITORY https://github.com/podofo/podofo.git
-			GIT_TAG 1.0.0-beta
-			GIT_SHALLOW TRUE
-			DOWNLOAD_DIR ${DOWNLOAD_DIR}
-			PATCH_COMMAND ${CMAKE_COMMAND} -E copy ${EXTERN_PATCH_DIR}/podofo/CMakeLists.txt <SOURCE_DIR>
-			CMAKE_ARGS
-				-DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
-				-DCMAKE_PREFIX_PATH=<INSTALL_DIR>
-				-DPODOFO_BUILD_LIB_ONLY=ON
-				-DPODOFO_BUILD_STATIC=${STATIC_BOOL}
-				-DCOMPILE_DEFINITIONS=${STATIC_XML}
-				${DISABLE_FIND_PACKAGE}
-				-DZLIB_USE_STATIC_LIBS=${ZLIB_USE_STATIC_LIBS}
-			BUILD_COMMAND
-				${CMAKE_COMMAND} --build <BINARY_DIR> --config RelWithDebInfo
-			INSTALL_COMMAND
-				${CMAKE_COMMAND} --install <BINARY_DIR> --config RelWithDebInfo
-			UPDATE_COMMAND ""  # Don't rebuild on main project recompilation
-			DEPENDS zlib-extern png-extern tiff-extern freetype-extern xml2-extern lzma-extern openssl-extern
-		)
-
 	endif()
+
+endif()
+
+if(podofo_FOUND)
+
+	message(STATUS "Found PoDoFo in ${podofo_DIR}")
+	# Needed for dependency satisfaction after external project has been built
+	add_custom_target(podofo-extern DEPENDS podofo)
+
+
+else() # PoDoFo has not been built yet. Configure for build.
+
+	set(HAVE_DEPENDENCIES FALSE)
+
+	set(DISABLE_FIND_PACKAGE)
+	if(WIN32)
+		set(DISABLE_FIND_PACKAGE -DCMAKE_DISABLE_FIND_PACKAGE_Libidn=TRUE -DCMAKE_DISABLE_FIND_PACKAGE_Fontconfig=TRUE)
+	else()
+		set(DISABLE_FIND_PACKAGE -DCMAKE_DISABLE_FIND_PACKAGE_Libidn=TRUE)
+	endif()
+
+	if(NOT BUILD_SHARED_LIBS)
+		set(STATIC_XML LIBXML_STATIC)
+	endif()
+
+	ExternalProject_Add(
+		podofo-extern
+		PREFIX ${EXTERN}
+		# URL https://github.com/podofo/podofo/archive/refs/tags/0.10.4.tar.gz
+		# URL_HASH SHA256=6b1b13cdfb2ba5e8bbc549df507023dd4873bc946211bc6942183b8496986904
+		GIT_REPOSITORY https://github.com/podofo/podofo.git
+		GIT_TAG 1.0.0-beta1
+		GIT_SHALLOW TRUE
+		DOWNLOAD_DIR ${DOWNLOAD_DIR}
+		PATCH_COMMAND ${CMAKE_COMMAND} -E copy ${EXTERN_PATCH_DIR}/podofo/CMakeLists.txt <SOURCE_DIR>
+		CMAKE_ARGS
+			-DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
+			-DCMAKE_PREFIX_PATH=<INSTALL_DIR>
+			-DPODOFO_BUILD_LIB_ONLY=ON
+			-DPODOFO_BUILD_STATIC=${STATIC_BOOL}
+			-DCOMPILE_DEFINITIONS=${STATIC_XML}
+			${DISABLE_FIND_PACKAGE}
+			-DZLIB_USE_STATIC_LIBS=${ZLIB_USE_STATIC_LIBS}
+		BUILD_COMMAND
+			${CMAKE_COMMAND} --build <BINARY_DIR> --config RelWithDebInfo
+		INSTALL_COMMAND
+			${CMAKE_COMMAND} --install <BINARY_DIR> --config RelWithDebInfo
+		UPDATE_COMMAND ""  # Don't rebuild on main project recompilation
+		DEPENDS zlib-extern png-extern tiff-extern freetype-extern xml2-extern lzma-extern openssl-extern
+	)
+
 endif()
