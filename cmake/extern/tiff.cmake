@@ -8,23 +8,21 @@ if(NOT WIN32 AND BUILD_SHARED_LIBS)
 else() # Local build
 
 	# Check if we built the package already
-	find_package(tiff
-		NO_MODULE				# Don't use installed modules for the search
+	find_package(TIFF
+		NO_MODULE		# Don't use installed modules for the search
 		NO_DEFAULT_PATH		# Only search in ${EXTERN}
 		HINTS ${EXTERN}
 		QUIET
 	)
 
-	if(tiff_FOUND)
+if(TIFF_FOUND)
 
-		# Add alias for podofo compatibility
-		add_library(TIFF::TIFF ALIAS TIFF::tiff)
-		# Fix Tiff not linking against lzma and zstd
-		target_link_libraries(TIFF::tiff INTERFACE liblzma::liblzma zstd)
+	add_library(TIFF::tiff ALIAS TIFF::TIFF)
+	# Fix Tiff not linking against lzma and zstd
+	target_link_libraries(TIFF::TIFF INTERFACE liblzma::liblzma zstd)
 
-		message(STATUS "Found tiff in ${tiff_DIR}")
-		# Needed for dependency satisfaction after external project has been built
-		add_custom_target(tiff-extern DEPENDS TIFF::tiff)
+	# Needed for dependency satisfaction after external project has been built
+	add_custom_target(tiff-extern DEPENDS TIFF::TIFF)
 
 	else()	# tiff has not been built yet. Configure for build.
 	
