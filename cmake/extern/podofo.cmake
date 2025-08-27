@@ -3,8 +3,16 @@
 
 if(NOT WIN32 AND BUILD_SHARED_LIBS)
 
-	find_package(podofo REQUIRED)
-	add_library(podofo ALIAS podofo_shared)
+	find_package(podofo QUIET)
+	if(NOT podofo_FOUND)
+		find_package(PkgConfig REQUIRED)
+		pkg_check_modules(PODOFO IMPORTED_TARGET libpodofo)
+	endif()
+	if(TARGET PkgConfig::PODOFO)
+		add_library(podofo ALIAS PkgConfig::PODOFO)
+	elseif(TARGET podofo_shared)
+		add_library(podofo ALIAS podofo_shared)
+	endif()
 	
 else() # Local build
 
@@ -20,8 +28,7 @@ else() # Local build
 	if(podofo_FOUND)
 		
 		if(BUILD_SHARED_LIBS)
-			add_library(podofo ALIAS podofo_shared)
-			target_link_libraries(podofo_shared INTERFACE OpenSSL::Crypto Freetype::Freetype LibXml2::LibXml2 ZLIB::ZLIB)
+			target_link_libraries(podofo INTERFACE OpenSSL::Crypto Freetype::Freetype LibXml2::LibXml2 ZLIB::ZLIB)
 		else()
 			add_library(podofo ALIAS podofo_static)
 			set_target_properties(podofo_static podofo_private PROPERTIES
