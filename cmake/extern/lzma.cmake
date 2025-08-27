@@ -4,6 +4,7 @@
 if(NOT WIN32 AND BUILD_SHARED_LIBS)
 
 	find_package(LibLZMA)		# This only finds shared libs
+	add_library(liblzma::liblzma ALIAS LibLZMA::LibLZMA)
 	
 else() # Local build
 	
