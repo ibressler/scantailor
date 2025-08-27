@@ -8,18 +8,18 @@ if(NOT WIN32 AND BUILD_SHARED_LIBS)
 else() # Local build
 	
 	# Check if we built the package already
-	find_package(png
+	find_package(PNG
 		NO_MODULE				# Don't use installed modules for the search
 		NO_DEFAULT_PATH		# Only search in ${EXTERN}
 		HINTS ${EXTERN}
 		QUIET
 	)
 
-	if(png_FOUND)
+if(PNG_FOUND)
 
-		message(STATUS "Found png in ${png_DIR}")
-		# Needed for dependency satisfaction after external project has been built
-		add_custom_target(png-extern DEPENDS PNG::PNG)
+	message(STATUS "Found png in ${PNG_DIR}")
+	# Needed for dependency satisfaction after external project has been built
+	add_custom_target(png-extern DEPENDS PNG::PNG)
 
 	else()	# png has not been built yet. Configure for build.
 	
