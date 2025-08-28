@@ -16,44 +16,44 @@ else() # Local build
 	endif()
 
 	# Zlib has no cmake target files so we need to use basic find_package mode
-	find_package(ZLIB	QUIET)
+	find_package(ZLIB QUIET)
+endif()
 
-	if(ZLIB_FOUND)
+if(ZLIB_FOUND)
 
-		message(STATUS "Found zlib: ${ZLIB_LIBRARIES} (version ${ZLIB_VERSION})")
-		# Needed for dependency satisfaction after external project has been built
-		add_custom_target(zlib-extern DEPENDS ZLIB::ZLIB)
+	message(STATUS "Found zlib: ${ZLIB_LIBRARIES} (version ${ZLIB_VERSION})")
+	# Needed for dependency satisfaction after external project has been built
+	add_custom_target(zlib-extern DEPENDS ZLIB::ZLIB)
 
-	else()	# zlib has not been built yet. Configure for build.
+else()	# zlib has not been built yet. Configure for build.
+
+	set(HAVE_DEPENDENCIES FALSE)
+
+	ExternalProject_Add(
+		zlib-extern
+		PREFIX ${EXTERN}
+		URL https://www.zlib.net/zlib-1.3.1.tar.xz
+		URL_HASH SHA256=38ef96b8dfe510d42707d9c781877914792541133e1870841463bfa73f883e32
+		DOWNLOAD_DIR ${DOWNLOAD_DIR}
+		CMAKE_ARGS
+			-DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
+			-DCMAKE_PREFIX_PATH=<INSTALL_DIR>
+			-DCMAKE_BUILD_TYPE=Release
+		BUILD_COMMAND
+			${CMAKE_COMMAND} --build <BINARY_DIR> --config Release
+		INSTALL_COMMAND
+			${CMAKE_COMMAND} --install <BINARY_DIR> --config Release
+		UPDATE_COMMAND ""  # Don't rebuild on main project recompilation
+	)
 	
-		set(HAVE_DEPENDENCIES FALSE)
-
-		ExternalProject_Add(
-			zlib-extern
-			PREFIX ${EXTERN}
-			URL https://www.zlib.net/zlib-1.3.1.tar.xz
-			URL_HASH SHA256=38ef96b8dfe510d42707d9c781877914792541133e1870841463bfa73f883e32
-			DOWNLOAD_DIR ${DOWNLOAD_DIR}
-			CMAKE_ARGS
-				-DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
-				-DCMAKE_PREFIX_PATH=<INSTALL_DIR>
-				-DCMAKE_BUILD_TYPE=Release
-			BUILD_COMMAND
-				${CMAKE_COMMAND} --build <BINARY_DIR> --config Release
-			INSTALL_COMMAND
-				${CMAKE_COMMAND} --install <BINARY_DIR> --config Release
-			UPDATE_COMMAND ""  # Don't rebuild on main project recompilation
+	# zlib installs both shared and static libs. If building static,
+	# we need to remove the shared lib, so they don't get picked up by other packages
+	if(NOT BUILD_SHARED_LIBS AND MSVC)
+		ExternalProject_Add_Step(
+			zlib-extern remove-shared
+			DEPENDEES install
+			COMMAND ${CMAKE_COMMAND} -E rm -f ${EXTERN_BIN_DIR}/zlib.dll
+			COMMAND ${CMAKE_COMMAND} -E rm -f ${EXTERN_LIB_DIR}/zlib.lib
 		)
-		
-		# zlib installs both shared and static libs. If building static,
-		# we need to remove the shared lib, so they don't get picked up by other packages
-		if(NOT BUILD_SHARED_LIBS AND MSVC)
-			ExternalProject_Add_Step(
-				zlib-extern remove-shared
-				DEPENDEES install
-				COMMAND ${CMAKE_COMMAND} -E rm -f ${EXTERN_BIN_DIR}/zlib.dll
-				COMMAND ${CMAKE_COMMAND} -E rm -f ${EXTERN_LIB_DIR}/zlib.lib
-			)
-		endif()
 	endif()
 endif()
