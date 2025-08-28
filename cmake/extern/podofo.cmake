@@ -3,8 +3,16 @@
 
 if(NOT WIN32 AND BUILD_SHARED_LIBS)
 
-	find_package(podofo REQUIRED)
-	add_library(podofo ALIAS podofo_shared)
+	find_package(podofo QUIET)
+	if(NOT podofo_FOUND)
+		find_package(PkgConfig REQUIRED)
+		pkg_check_modules(PODOFO IMPORTED_TARGET libpodofo)
+	endif()
+	if(TARGET PkgConfig::PODOFO)
+		add_library(podofo ALIAS PkgConfig::PODOFO)
+	elseif(TARGET podofo_shared)
+		add_library(podofo ALIAS podofo_shared)
+	endif()
 	
 else() # Local build
 
@@ -60,7 +68,7 @@ else() # PoDoFo has not been built yet. Configure for build.
 		# URL https://github.com/podofo/podofo/archive/refs/tags/0.10.4.tar.gz
 		# URL_HASH SHA256=6b1b13cdfb2ba5e8bbc549df507023dd4873bc946211bc6942183b8496986904
 		GIT_REPOSITORY https://github.com/podofo/podofo.git
-		GIT_TAG 1.0.0-beta
+		GIT_TAG 1.0.0-beta1
 		GIT_SHALLOW TRUE
 		DOWNLOAD_DIR ${DOWNLOAD_DIR}
 		PATCH_COMMAND ${CMAKE_COMMAND} -E copy ${EXTERN_PATCH_DIR}/podofo/CMakeLists.txt <SOURCE_DIR>
