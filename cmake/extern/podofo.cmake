@@ -25,20 +25,16 @@ else() # Local build
 		QUIET
 	)
 
-	if(podofo_FOUND)
-		
-		if(BUILD_SHARED_LIBS)
-			target_link_libraries(podofo INTERFACE OpenSSL::Crypto Freetype::Freetype LibXml2::LibXml2 ZLIB::ZLIB)
-		else()
-			add_library(podofo ALIAS podofo_static)
-			set_target_properties(podofo_static podofo_private PROPERTIES
-				INTERFACE_INCLUDE_DIRECTORIES ${EXTERN_INC_DIR}/podofo
-				INTERFACE_COMPILE_DEFINITIONS PODOFO_STATIC
-			)
-			# Fix podofo not linking against OpenSSL::Crypto
-			target_link_libraries(podofo_static INTERFACE OpenSSL::Crypto Freetype::Freetype LibXml2::LibXml2 ZLIB::ZLIB)
-		endif()
-	
+	if(BUILD_SHARED_LIBS)
+		target_link_libraries(podofo INTERFACE OpenSSL::Crypto Freetype::Freetype LibXml2::LibXml2 ZLIB::ZLIB)
+	else()
+		add_library(podofo ALIAS podofo_static)
+		set_target_properties(podofo_static podofo_private PROPERTIES
+			INTERFACE_INCLUDE_DIRECTORIES ${EXTERN_INC_DIR}/podofo
+			INTERFACE_COMPILE_DEFINITIONS PODOFO_STATIC
+		)
+		# Fix podofo not linking against OpenSSL::Crypto
+		target_link_libraries(podofo_static INTERFACE OpenSSL::Crypto Freetype::Freetype LibXml2::LibXml2 ZLIB::ZLIB)
 	endif()
 
 endif()
