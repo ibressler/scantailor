@@ -59,12 +59,14 @@ MACRO(FindPthreads)
 		
 		FILE(WRITE ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/TestPthreads.c
 			"#include <pthread.h>\n"
+			"void* start_func(void* arg) { return 0; }\n"
 			"int main()\n"
 			"{\n"
 			"	pthread_t th;\n"
-			"	pthread_create(&th, 0, 0, 0);\n"
+			"	pthread_attr_t attr;\n"
+			"	pthread_create(&th, 0, start_func, 0);\n"
 			"	pthread_join(th, 0);\n"
-			"	pthread_attr_init(0);\n"
+			"	pthread_attr_init(&attr);\n"
 			"	pthread_cleanup_push(0, 0);\n"
 			"	pthread_cleanup_pop(0);\n"
 			"   return 0;\n"
@@ -77,6 +79,7 @@ MACRO(FindPthreads)
 			CMAKE_FLAGS "-DLINK_LIBRARIES:STRING=${_libs}"
 			COMPILE_DEFINITIONS "${_cflags}"
 			OUTPUT_VARIABLE _out
+			NO_CACHE
 		)
 		IF(PTHREADS_FOUND)
 			MESSAGE(STATUS "Checking pthreads with CFLAGS=\"${_cflags}\" and LIBS=\"${_libs}\" -- yes")
