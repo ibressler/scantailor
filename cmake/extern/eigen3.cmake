@@ -3,7 +3,7 @@
 
 # Try searching for Eigen in system
 # This finds eigen in other local build trees, but sets the include path wrong for some reason.
-# find_package(Eigen3 NO_MODULE GLOBAL QUIET)
+find_package(Eigen3 NO_MODULE GLOBAL QUIET)
 
 if(TARGET Eigen3::Eigen)
 
