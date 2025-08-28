@@ -36,20 +36,17 @@ PdfReader::readMetadata(QFile& file,
 	qint64 width = 0;
 	qint64 height = 0;
 	
-	auto& pPage = pdfDoc.GetPages().GetPageAt(0);
+	PdfPage & pPage = pdfDoc.GetPages().GetPageAt(0);
 
-	auto* pResources = pPage.GetResources();
-	if (!pResources) {
-		return ImageMetadataLoader::NO_IMAGES;
-	}
+	PdfResources & pResources = pPage.GetResources();
 
-	PdfDictionary& resourceDict = pResources->GetDictionary();
-	auto xObjectIterator = pResources->GetResourceIterator(PdfResourceType::XObject);
+	PdfDictionary& resourceDict = pResources.GetDictionary();
+	auto xObjectIterator = pResources.GetResourceIterator(PdfResourceType::XObject);
 
 	for (auto it = xObjectIterator.begin(); it != xObjectIterator.end(); ++it)
 	{
 		PdfObject obj = *(it->second);
-		if (&obj && obj.IsDictionary())
+		if (obj.IsDictionary())
 		{
 			PdfObject* pObjType = obj.GetDictionary().GetKey("Type");
 			PdfObject* pObjSubType = obj.GetDictionary().GetKey("Subtype");
@@ -96,7 +93,7 @@ PdfReader::readImage(QFile& file, int const page_num)
 	PdfMemDocument pdfDoc;
 	pdfDoc.Load(file.fileName().toStdString());
 	// get page
-	auto& pPage = pdfDoc.GetPages().GetPageAt(page_num);
+	PdfPage & pPage = pdfDoc.GetPages().GetPageAt(page_num);
 
 	// stores the image to extract; only the largest one on the page is chosen
 	PdfObject * pdfImage = nullptr;
@@ -105,17 +102,14 @@ PdfReader::readImage(QFile& file, int const page_num)
 	qint64 height = 0;
 	
 	// go through all resources on the page and extract dimensions of each image
-	auto pResources = pPage.GetResources();
-	if (!pResources) {
-		return QImage();
-	}
+	PdfResources & pResources = pPage.GetResources();
 
-	auto xObjectIterator = pResources->GetResourceIterator(PdfResourceType::XObject);
+	auto xObjectIterator = pResources.GetResourceIterator(PdfResourceType::XObject);
 
 	for (auto it = xObjectIterator.begin(); it != xObjectIterator.end(); ++it)
 	{
 		PdfObject obj = *(it->second);
-		if (&obj && obj.IsDictionary()) {
+		if (obj.IsDictionary()) {
 			PdfObject* pObjType = obj.GetDictionary().GetKey("Type");
 			PdfObject* pObjSubType = obj.GetDictionary().GetKey("Subtype");
 
